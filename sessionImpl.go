@@ -23,7 +23,7 @@
 package gogm
 
 import (
-	"github.com/neo4j/neo4j-go-driver/neo4j"
+	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 )
 
 type sessionImpl struct {
@@ -84,26 +84,26 @@ func (s *sessionImpl) GetTransaction() *transaction {
 	return s.transactioner.transaction
 }
 
-//Precondition:
+// Precondition:
 // * object is a pointer to a pointer of domain object: **<domainObject>
 // * cypher returns one record with a column of domain object(s)
 // * database entity type - node/relationhip - returned by cypher matches the domain object type - node/relationship
 // * it is the user's resposibility to make sure  the database object returned by cypher are unloadable into domain object
 //
-//Post condition:
-//Polulated domain objects
+// Post condition:
+// Polulated domain objects
 func (s *sessionImpl) QueryForObject(object interface{}, cypher string, parameters map[string]interface{}) error {
 	return s.queryer.queryForObject(object, cypher, parameters)
 }
 
-//Precondition:
+// Precondition:
 // * objects is a pointer to slice of pointers to domain objects: *[]*<domainObject>
 // * cypher returns one or more record(s) with a column of domain object(s)
 // * database entity type - node/relationhip - returned by cypher matches the domain object type -node/relationship
 // * it is the user's resposibility to make sure that database objects returned by cypher are unloadable into the domain object
 //
-//Post condition:
-//Polulated domain objects
+// Post condition:
+// Polulated domain objects
 func (s *sessionImpl) QueryForObjects(objects interface{}, cypher string, parameters map[string]interface{}) error {
 	return s.queryer.queryForObjects(objects, cypher, parameters)
 }

@@ -29,7 +29,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/neo4j/neo4j-go-driver/neo4j"
+	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 )
 
 type queryer struct {
@@ -47,9 +47,9 @@ func (q *queryer) queryForObject(object interface{}, cypher string, parameters m
 		err      error
 		values   reflect.Value
 		metadata metadata
-		records  []neo4j.Record
+		records  []*neo4j.Record
 	)
-	//Object: **DomainObject
+	// Object: **DomainObject
 	domainObjectType := reflect.TypeOf(object).Elem()
 	if metadata, err = q.registry.get(domainObjectType); err != nil {
 		return err
@@ -63,7 +63,7 @@ func (q *queryer) queryForObject(object interface{}, cypher string, parameters m
 	}
 
 	if len(records) == 1 {
-		if values, err = q.getObjectsFromRecords(domainObjectType, metadata, label, []neo4j.Record{records[0]}); err != nil {
+		if values, err = q.getObjectsFromRecords(domainObjectType, metadata, label, []*neo4j.Record{records[0]}); err != nil {
 			return err
 		}
 
@@ -82,11 +82,11 @@ func (q *queryer) queryForObjects(objects interface{}, cypher string, parameters
 
 	var (
 		err      error
-		records  []neo4j.Record
+		records  []*neo4j.Record
 		values   reflect.Value
 		metadata metadata
 	)
-	//Object type is *[]*<DomaoinObject>
+	// Object type is *[]*<DomaoinObject>
 	domainObjectType := reflect.TypeOf(objects).Elem().Elem()
 	if metadata, err = q.registry.get(domainObjectType); err != nil {
 		return err
@@ -110,7 +110,7 @@ func (q *queryer) queryForObjects(objects interface{}, cypher string, parameters
 
 func (q *queryer) query(cypher string, parameters map[string]interface{}, objects ...interface{}) ([]map[string]interface{}, error) {
 
-	//registry all objects
+	// registry all objects
 	for _, object := range objects {
 		if _, err := q.registry.get(reflect.TypeOf(object).Elem()); err != nil {
 			return nil, err
@@ -125,20 +125,20 @@ func (q *queryer) query(cypher string, parameters map[string]interface{}, object
 	rows := []map[string]interface{}{}
 	for _, record := range records {
 		columns := map[string]interface{}{}
-		for index, key := range record.Keys() {
+		for index, key := range record.Keys {
 			if neo4jNode, isNeo4jNode := record.GetByIndex(index).(neo4j.Node); isNeo4jNode == true {
 				var g graph
-				properties := neo4jNode.Props()
+				properties := neo4jNode.Props
 
-				//find node struct and add it
-				for _, label := range neo4jNode.Labels() {
+				// find node struct and add it
+				for _, label := range neo4jNode.Labels {
 					for _, metadata := range q.registry.getLabelMetadatas(label) {
 						if nodeMetadata, ok := metadata.(*nodeMetadata); ok && nodeMetadata.getType() != nil /*chech for nil?*/ {
 
-							nodeLabels := make([]string, len(neo4jNode.Labels()))
-							copy(nodeLabels, neo4jNode.Labels())
+							nodeLabels := make([]string, len(neo4jNode.Labels))
+							copy(nodeLabels, neo4jNode.Labels)
 
-							//remove runtime labels from node labels
+							// remove runtime labels from node labels
 							if nodeMetadata.runtimeLabelsStructField != nil {
 								name := strings.ToLower(nodeMetadata.runtimeLabelsStructField.Name)
 								names := getNamespacedTag(nodeMetadata.runtimeLabelsStructField.Tag).get(propertyNameTag)
@@ -158,8 +158,8 @@ func (q *queryer) query(cypher string, parameters map[string]interface{}, object
 								v := reflect.New(nodeMetadata.getType().Elem())
 								g = &node{
 									Value:      &v,
-									properties: neo4jNode.Props()}
-								g.getProperties()[idPropertyName] = neo4jNode.Id()
+									properties: neo4jNode.Props}
+								g.getProperties()[idPropertyName] = neo4jNode.Id
 								driverPropertiesAsStructFieldValues(g.getProperties(), nodeMetadata.getPropertyStructFields())
 								unloadGraphProperties(g, nodeMetadata.getPropertyStructFields())
 								break
@@ -172,22 +172,22 @@ func (q *queryer) query(cypher string, parameters map[string]interface{}, object
 					}
 				}
 				if g == nil {
-					return nil, errors.New(fmt.Sprint("Not found: Runtime object for Node with id:", neo4jNode.Id(), " and label:", strings.Join(neo4jNode.Labels(), labelsDelim)))
+					return nil, errors.New(fmt.Sprint("Not found: Runtime object for Node with id:", neo4jNode.Id, " and label:", strings.Join(neo4jNode.Labels, labelsDelim)))
 				}
 				columns[key] = g.getValue().Interface()
 			} else if neo4jRelationship, isNeo4jRelationship := record.GetByIndex(index).(neo4j.Relationship); isNeo4jRelationship == true {
 
-				//find relationship struct and add it
+				// find relationship struct and add it
 				var g graph
-				relType := neo4jRelationship.Type()
+				relType := neo4jRelationship.Type
 				for _, metadata := range q.registry.getLabelMetadatas(relType) {
 					if relationshipMetadata, ok := metadata.(*relationshipMetadata); ok && relationshipMetadata.getType() != nil /*chech for nil?*/ {
-						if relationshipMetadata.structLabel == neo4jRelationship.Type() {
+						if relationshipMetadata.structLabel == neo4jRelationship.Type {
 							v := reflect.New(relationshipMetadata.getType().Elem())
 							g = &relationship{
 								Value:      &v,
-								properties: neo4jRelationship.Props()}
-							g.getProperties()[idPropertyName] = neo4jRelationship.Id()
+								properties: neo4jRelationship.Props}
+							g.getProperties()[idPropertyName] = neo4jRelationship.Id
 							driverPropertiesAsStructFieldValues(g.getProperties(), relationshipMetadata.getPropertyStructFields())
 							unloadGraphProperties(g, relationshipMetadata.getPropertyStructFields())
 							break
@@ -195,7 +195,7 @@ func (q *queryer) query(cypher string, parameters map[string]interface{}, object
 					}
 				}
 				if g == nil {
-					return nil, errors.New(fmt.Sprint("Not found: Runtime object for Node with id:", neo4jRelationship.Id(), " and type:", neo4jRelationship.Type()))
+					return nil, errors.New(fmt.Sprint("Not found: Runtime object for Node with id:", neo4jRelationship.Id, " and type:", neo4jRelationship.Type))
 				}
 				columns[key] = g.getValue().Interface()
 			} else {
@@ -208,7 +208,7 @@ func (q *queryer) query(cypher string, parameters map[string]interface{}, object
 	return rows, err
 }
 
-func (q *queryer) getObjectsFromRecords(domainObjectType reflect.Type, metadata metadata, label string, records []neo4j.Record) (reflect.Value, error) {
+func (q *queryer) getObjectsFromRecords(domainObjectType reflect.Type, metadata metadata, label string, records []*neo4j.Record) (reflect.Value, error) {
 
 	var (
 		g                       graph
@@ -229,13 +229,13 @@ func (q *queryer) getObjectsFromRecords(domainObjectType reflect.Type, metadata 
 				return invalidValue, errors.New("Expecting a Relationship, but got a Node from the query response")
 			}
 			nodeMetadata := metadata.(*nodeMetadata)
-			labels := neo4jNode.Labels()
+			labels := neo4jNode.Labels
 			sort.Strings(labels)
 			g = &node{
-				ID:         neo4jNode.Id(),
-				properties: neo4jNode.Props(),
+				ID:         neo4jNode.Id,
+				properties: neo4jNode.Props,
 				label:      strings.Join(labels, labelsDelim)}
-			g.getProperties()[idPropertyName] = neo4jNode.Id()
+			g.getProperties()[idPropertyName] = neo4jNode.Id
 
 			entityLabel = nodeMetadata.filterStructLabel(g)
 		}
@@ -245,11 +245,11 @@ func (q *queryer) getObjectsFromRecords(domainObjectType reflect.Type, metadata 
 				return invalidValue, errors.New("Unexpected graph type. Expecting a Node, but got a Relationship from the query response")
 			}
 			g = &relationship{
-				ID:         neo4jRelationship.Id(),
-				properties: neo4jRelationship.Props(),
-				relType:    neo4jRelationship.Type()}
-			g.getProperties()[idPropertyName] = neo4jRelationship.Id()
-			entityLabel = neo4jRelationship.Type()
+				ID:         neo4jRelationship.Id,
+				properties: neo4jRelationship.Props,
+				relType:    neo4jRelationship.Type}
+			g.getProperties()[idPropertyName] = neo4jRelationship.Id
+			entityLabel = neo4jRelationship.Type
 		}
 		g.setValue(&newPtrToDomainObject)
 		g.setLabel(label)
@@ -270,7 +270,7 @@ func (q *queryer) countEntitiesOfType(object interface{}) (int64, error) {
 
 	var (
 		value         = reflect.ValueOf(object)
-		record        neo4j.Record
+		record        *neo4j.Record
 		count         int64
 		cypherBuilder graphQueryBuilder
 		graphs        []graph
@@ -279,7 +279,7 @@ func (q *queryer) countEntitiesOfType(object interface{}) (int64, error) {
 		err           error
 	)
 
-	//object: **DomainObject
+	// object: **DomainObject
 	if graphs, err = q.graphFactory.get(reflect.New(value.Elem().Type()), map[int]bool{labels: true}); err != nil {
 		return -1, err
 	}
@@ -303,7 +303,7 @@ func (q *queryer) countEntitiesOfType(object interface{}) (int64, error) {
 
 func (q *queryer) count(cypher string, parameters map[string]interface{}) (int64, error) {
 	var (
-		record neo4j.Record
+		record *neo4j.Record
 		err    error
 	)
 	if record, err = neo4j.Single(q.cypherExecuter.exec(cypher, parameters)); err != nil {

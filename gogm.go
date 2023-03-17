@@ -26,7 +26,7 @@ import (
 	"math"
 	"reflect"
 
-	"github.com/neo4j/neo4j-go-driver/neo4j"
+	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 )
 
 const (
@@ -97,20 +97,20 @@ var logLevels = map[LogLevel]neo4j.LogLevel{
 	DEBUG:   neo4j.DEBUG,
 }
 
-//Gogm is an instance of the OGM
+// Gogm is an instance of the OGM
 type Gogm struct {
 	config *Config
 	driver neo4j.Driver
 }
 
-//New creates a new instance of the OGM
+// New creates a new instance of the OGM
 func New(config *Config) *Gogm {
 	return &Gogm{
 		config,
 		nil}
 }
 
-//NewSession creates a new session on an OGM instance
+// NewSession creates a new session on an OGM instance
 func (g *Gogm) NewSession(isWriteMode bool) (Session, error) {
 
 	var err error

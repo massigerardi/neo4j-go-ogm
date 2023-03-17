@@ -25,7 +25,7 @@ package gogm
 import (
 	"reflect"
 
-	"github.com/neo4j/neo4j-go-driver/neo4j"
+	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 )
 
 type deleter struct {
@@ -49,7 +49,7 @@ func (d *deleter) delete(object interface{}) error {
 		parameters         = []map[string]interface{}{}
 		graphDeleteClauses = map[clause][]string{}
 		graphs             []graph
-		record             neo4j.Record
+		record             *neo4j.Record
 	)
 
 	if graphs, err = d.graphFactory.get(value, map[int]bool{labels: true, relatedGraph: true}); err != nil {
@@ -126,7 +126,7 @@ func (d *deleter) deleteAll(object interface{}, deleteOptions *DeleteOptions) er
 		value   = reflect.ValueOf(object)
 		graphs  []graph
 		err     error
-		records []neo4j.Record
+		records []*neo4j.Record
 	)
 
 	if graphs, err = d.graphFactory.get(value, map[int]bool{labels: true}); err != nil {

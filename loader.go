@@ -28,7 +28,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/neo4j/neo4j-go-driver/neo4j"
+	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 )
 
 type loader struct {
@@ -58,7 +58,7 @@ func (l *loader) load(object interface{}, ID interface{}, loadOptions *LoadOptio
 	ptrToSliceIDs.Elem().Set(sliceOfIDs)
 	ptrToSliceIDs.Elem().Index(0).Set(valueOfID)
 
-	//object: **DomainObject
+	// object: **DomainObject
 	if graphs, err = l.graphFactory.get(valueOfObject, map[int]bool{labels: true, relatedGraph: true}); err != nil {
 		return nil, err
 	}
@@ -91,7 +91,7 @@ func (l *loader) loadAll(objects interface{}, IDs interface{}, loadOptions *Load
 		err         error
 	)
 
-	//objects: *[]*DomainObject
+	// objects: *[]*DomainObject
 	if graphs, err = l.graphFactory.get(reflect.ValueOf(objects), map[int]bool{labels: true, relatedGraph: true}); err != nil {
 		return err
 	}
@@ -119,7 +119,7 @@ func (l *loader) reload(objects ...interface{}) error {
 	var storedGraph graph
 	for _, object := range objects {
 		valueOfObject := reflect.ValueOf(object)
-		//object: **DomainObject
+		// object: **DomainObject
 		if graphs, err = l.graphFactory.get(valueOfObject, map[int]bool{labels: true, relatedGraph: true}); err != nil {
 			return err
 		}
@@ -175,7 +175,7 @@ func (l *loader) loadAllOfGraphType(refGraph graph, IDs interface{}, loadOptions
 		sliceOfPtrToObjs = reflect.MakeSlice(reflect.SliceOf(reflect.PtrTo(refGraph.getValue().Type().Elem())), 0, 0)
 		ptrToObjs        = reflect.New(sliceOfPtrToObjs.Type())
 
-		records     []neo4j.Record
+		records     []*neo4j.Record
 		storedGraph graph
 	)
 
@@ -296,8 +296,8 @@ func (l *loader) loadAllOfGraphType(refGraph graph, IDs interface{}, loadOptions
 
 func (l *loader) getGraphToLoadFromDBResult(path neo4j.Path, isDirectionInverted []interface{}, refGraph graph, visitedGraphs store, depth int) graph {
 
-	nodes := path.Nodes()
-	relationships := path.Relationships()
+	nodes := path.Nodes
+	relationships := path.Relationships
 	internalGraphType := reflect.TypeOf(refGraph)
 	graphToLoadType := refGraph.getValue().Type().Elem()
 	ID := refGraph.getID()
@@ -308,29 +308,29 @@ func (l *loader) getGraphToLoadFromDBResult(path neo4j.Path, isDirectionInverted
 		from := nodes[index]
 		to := nodes[index+1]
 
-		if visitedGraphs.relationship(neoRelationship.Id()) == nil {
+		if visitedGraphs.relationship(neoRelationship.Id) == nil {
 
 			var fromNode, toNode graph
-			if fromNode = visitedGraphs.node(from.Id()); fromNode == nil {
-				labels := from.Labels()
+			if fromNode = visitedGraphs.node(from.Id); fromNode == nil {
+				labels := from.Labels
 				sort.Strings(labels)
 				fromNode = &node{
-					properties:    from.Props(),
+					properties:    from.Props,
 					label:         strings.Join(labels, labelsDelim),
 					relationships: map[int64]graph{}}
-				fromNode.setID(from.Id())
-				fromNode.getProperties()[idPropertyName] = from.Id()
+				fromNode.setID(from.Id)
+				fromNode.getProperties()[idPropertyName] = from.Id
 				visitedGraphs.save(fromNode)
 			}
-			if toNode = visitedGraphs.node(to.Id()); toNode == nil {
-				labels := to.Labels()
+			if toNode = visitedGraphs.node(to.Id); toNode == nil {
+				labels := to.Labels
 				sort.Strings(labels)
 				toNode = &node{
-					properties:    to.Props(),
+					properties:    to.Props,
 					label:         strings.Join(labels, labelsDelim),
 					relationships: map[int64]graph{}}
-				toNode.setID(to.Id())
-				toNode.getProperties()[idPropertyName] = to.Id()
+				toNode.setID(to.Id)
+				toNode.getProperties()[idPropertyName] = to.Id
 				visitedGraphs.save(toNode)
 			}
 
@@ -340,11 +340,11 @@ func (l *loader) getGraphToLoadFromDBResult(path neo4j.Path, isDirectionInverted
 			}
 
 			fromNodeToNode := &relationship{
-				relType:    neoRelationship.Type(),
-				properties: neoRelationship.Props(),
+				relType:    neoRelationship.Type,
+				properties: neoRelationship.Props,
 				nodes:      nodes}
-			fromNodeToNode.setID(neoRelationship.Id())
-			fromNodeToNode.getProperties()[idPropertyName] = neoRelationship.Id()
+			fromNodeToNode.setID(neoRelationship.Id)
+			fromNodeToNode.getProperties()[idPropertyName] = neoRelationship.Id
 			visitedGraphs.save(fromNodeToNode)
 
 			fromNode.setRelatedGraph(fromNodeToNode)
@@ -352,12 +352,12 @@ func (l *loader) getGraphToLoadFromDBResult(path neo4j.Path, isDirectionInverted
 
 			if graphToLoad == nil {
 				if internalGraphType == typeOfPrivateNode {
-					if from.Id() == ID {
+					if from.Id == ID {
 						graphToLoad = fromNode
-					} else if to.Id() == ID {
+					} else if to.Id == ID {
 						graphToLoad = toNode
 					}
-				} else if internalGraphType == typeOfPrivateRelationship && neoRelationship.Id() == ID {
+				} else if internalGraphType == typeOfPrivateRelationship && neoRelationship.Id == ID {
 					graphToLoad = fromNodeToNode
 				}
 			}
@@ -366,11 +366,11 @@ func (l *loader) getGraphToLoadFromDBResult(path neo4j.Path, isDirectionInverted
 
 	if graphToLoad == nil && len(relationships) == 0 {
 		node := &node{
-			properties:    nodes[0].Props(),
-			label:         strings.Join(nodes[0].Labels(), labelsDelim),
+			properties:    nodes[0].Props,
+			label:         strings.Join(nodes[0].Labels, labelsDelim),
 			relationships: map[int64]graph{}}
-		node.setID(nodes[0].Id())
-		node.getProperties()[idPropertyName] = nodes[0].Id()
+		node.setID(nodes[0].Id)
+		node.getProperties()[idPropertyName] = nodes[0].Id
 		visitedGraphs.save(node)
 		graphToLoad = node
 	}
@@ -446,8 +446,8 @@ func (l *loader) unloadDBObject(g graph, unloadedGrahps store, depth int, relate
 				}
 
 				if graphfield == nil {
-					//'first' must be a Node. A relationship can't have a missing field.
-					//Remove the related graph since its value can't be determined.
+					// 'first' must be a Node. A relationship can't have a missing field.
+					// Remove the related graph since its value can't be determined.
 					delete(first.getRelatedGraphs(), relatedGraph.getID())
 					continue
 				}
@@ -462,7 +462,7 @@ func (l *loader) unloadDBObject(g graph, unloadedGrahps store, depth int, relate
 				addDomainObject(graphfield, value)
 				relatedGraph.setValue(&value)
 
-				//'first' is a Node and related graph field is a Node field. relatedGraph is relationship A
+				// 'first' is a Node and related graph field is a Node field. relatedGraph is relationship A
 				if first.getValue().IsValid() && reflect.TypeOf(firstMetadata) == reflect.TypeOf(graphFieldMetadata) {
 					relatedGraph.setValue(&invalidValue)
 					otherNode := relatedGraph.getRelatedGraphs()[startNode]

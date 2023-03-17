@@ -26,7 +26,7 @@ import (
 	"time"
 
 	gogm "github.com/codingfinest/neo4j-go-ogm"
-	"github.com/neo4j/neo4j-go-driver/neo4j"
+	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 )
 
 type TestNodeEntity struct {
@@ -39,7 +39,7 @@ type SimpleNode struct {
 	Prop1 string
 }
 
-//(node0)-->(node1)-->(node2)<--(node3)-->(node4)
+// (node0)-->(node1)-->(node2)<--(node3)-->(node4)
 type Node0 struct {
 	TestNodeEntity
 	Name             string
@@ -120,7 +120,7 @@ type Node9 struct {
 
 type Node10 struct {
 	TestNodeEntity
-	//ZeroTime     time.Time
+	// ZeroTime     time.Time
 	NilTime1     *time.Time
 	ZeroDuration neo4j.Duration
 

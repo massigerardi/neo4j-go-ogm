@@ -27,7 +27,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/neo4j/neo4j-go-driver/neo4j"
+	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 
 	gogm "github.com/codingfinest/neo4j-go-ogm"
 	. "github.com/codingfinest/neo4j-go-ogm/tests/models"
@@ -48,18 +48,18 @@ const deletedID int64 = -1
 
 var eventListener = &TestEventListener{}
 
-//Context: when simple node object is saved
-//Spec: should have metadata properties updated
+// Context: when simple node object is saved
+// Spec: should have metadata properties updated
 func TestNodeSave(t *testing.T) {
 	g := NewGomegaWithT(t)
 	g.Expect(session.PurgeDatabase()).NotTo(HaveOccurred())
 	g.Expect(session.RegisterEventListener(eventListener)).NotTo(HaveOccurred())
 
-	//Context
+	// Context
 	simpleNode := &SimpleNode{}
 	g.Expect(session.Save(&simpleNode, nil)).NotTo(HaveOccurred())
 
-	//Spec
+	// Spec
 	g.Expect(simpleNode.CreatedAt).ToNot(BeZero())
 	g.Expect(simpleNode.DeletedAt).To(BeZero())
 	g.Expect(simpleNode.UpdatedAt).To(BeZero())
@@ -69,14 +69,14 @@ func TestNodeSave(t *testing.T) {
 	g.Expect(session.DisposeEventListener(eventListener)).NotTo(HaveOccurred())
 }
 
-//Context:when simple realtionship object is saved
-//Spec:should have metadata properties updated
+// Context:when simple realtionship object is saved
+// Spec:should have metadata properties updated
 func TestRelationshipSave(t *testing.T) {
 	g := NewGomegaWithT(t)
 	g.Expect(session.PurgeDatabase()).NotTo(HaveOccurred())
 	g.Expect(session.RegisterEventListener(eventListener)).NotTo(HaveOccurred())
 
-	//Context
+	// Context
 	simpleRelationship := &SimpleRelationship{}
 	n4 := &Node4{}
 	n5 := &Node5{}
@@ -85,7 +85,7 @@ func TestRelationshipSave(t *testing.T) {
 
 	g.Expect(session.Save(&simpleRelationship, nil)).NotTo(HaveOccurred())
 
-	//Spec
+	// Spec
 	g.Expect(simpleRelationship.CreatedAt).ToNot(BeZero())
 	g.Expect(simpleRelationship.DeletedAt).To(BeZero())
 	g.Expect(simpleRelationship.UpdatedAt).To(BeZero())
@@ -102,12 +102,12 @@ func TestNodeSaveWithoutUpdate(t *testing.T) {
 	g.Expect(session.PurgeDatabase()).NotTo(HaveOccurred())
 	g.Expect(session.RegisterEventListener(eventListener)).NotTo(HaveOccurred())
 
-	//Context
+	// Context
 	simpleNode := &SimpleNode{}
 	g.Expect(session.Save(&simpleNode, nil)).NotTo(HaveOccurred())
 	g.Expect(session.Save(&simpleNode, nil)).NotTo(HaveOccurred())
 
-	//Spec
+	// Spec
 	g.Expect(*simpleNode.ID > -1).To(BeTrue())
 	g.Expect(simpleNode.UpdatedAt).To(BeZero())
 
@@ -120,7 +120,7 @@ func TestRelationshipSaveWithoutUpdate(t *testing.T) {
 	g.Expect(session.PurgeDatabase()).NotTo(HaveOccurred())
 	g.Expect(session.RegisterEventListener(eventListener)).NotTo(HaveOccurred())
 
-	//Context
+	// Context
 	simpleRelationship := &SimpleRelationship{}
 	n5 := &Node5{}
 	n4 := &Node4{}
@@ -129,7 +129,7 @@ func TestRelationshipSaveWithoutUpdate(t *testing.T) {
 	g.Expect(session.Save(&simpleRelationship, nil)).NotTo(HaveOccurred())
 	g.Expect(session.Save(&simpleRelationship, nil)).NotTo(HaveOccurred())
 
-	//Spec
+	// Spec
 	g.Expect(*simpleRelationship.ID > -1).To(BeTrue())
 	g.Expect(*n4.ID > -1).To(BeTrue())
 	g.Expect(*n5.ID > -1).To(BeTrue())
@@ -299,8 +299,8 @@ func TestRelationshipDelete(t *testing.T) {
 	g.Expect(session.DisposeEventListener(eventListener)).NotTo(HaveOccurred())
 }
 
-//Context: When a node object is removed from a parent node entity
-//Spec: Corresponding relationship should be removed
+// Context: When a node object is removed from a parent node entity
+// Spec: Corresponding relationship should be removed
 func TestRemoveNode(t *testing.T) {
 	g := NewGomegaWithT(t)
 	g.Expect(session.PurgeDatabase()).NotTo(HaveOccurred())
@@ -355,7 +355,7 @@ func TestDeleteRelationshipEndpoint(t *testing.T) {
 	g.Expect(session.Save(&simpleRelationship, nil)).NotTo(HaveOccurred())
 	g.Expect(session.Delete(&n4)).NotTo(HaveOccurred())
 
-	//Spec
+	// Spec
 	g.Expect(n4.DeletedAt).NotTo(BeZero())
 	g.Expect(simpleRelationship.DeletedAt).NotTo(BeZero())
 	g.Expect(*n4.ID).To(Equal(deletedID))
@@ -386,7 +386,7 @@ func TestDeleteRelationship(t *testing.T) {
 	g.Expect(session.Save(&simpleRelationship, nil)).NotTo(HaveOccurred())
 	g.Expect(session.Delete(&simpleRelationship)).NotTo(HaveOccurred())
 
-	//Spec
+	// Spec
 	g.Expect(n4.DeletedAt).To(BeZero())
 	g.Expect(n4.UpdatedAt).ToNot(BeZero())
 	g.Expect(n5.DeletedAt).To(BeZero())
@@ -610,14 +610,14 @@ func TestLoadingSameNodeTypesNavigableInBothDir(t *testing.T) {
 	g.Expect(session.DisposeEventListener(eventListener)).NotTo(HaveOccurred())
 }
 
-//Context:when path is saved
-//Spec:should be able to log full path
+// Context:when path is saved
+// Spec:should be able to log full path
 func TestFullPathSaveByOGMIsLoadable(t *testing.T) {
 	g := NewGomegaWithT(t)
 	g.Expect(session.PurgeDatabase()).NotTo(HaveOccurred())
 	g.Expect(session.DisposeEventListener(eventListener)).NotTo(HaveOccurred())
 
-	//(node0)-->(node1)-->(node2)<--(node3)-->(node4)
+	// (node0)-->(node1)-->(node2)<--(node3)-->(node4)
 	n0 := &Node0{}
 	n1 := &Node1{}
 	n2 := &Node2{}
@@ -658,15 +658,15 @@ func TestFullPathSaveByOGMIsLoadable(t *testing.T) {
 	g.Expect(session.DisposeEventListener(eventListener)).NotTo(HaveOccurred())
 }
 
-//Context: when path is saved
-//Spec: should be able to load path up to depth x
+// Context: when path is saved
+// Spec: should be able to load path up to depth x
 func TestPathSaveByOGMIsLoadable(t *testing.T) {
 
 	g := NewGomegaWithT(t)
 	g.Expect(session.PurgeDatabase()).NotTo(HaveOccurred())
 	g.Expect(session.DisposeEventListener(eventListener)).NotTo(HaveOccurred())
 
-	//(node0)-->(node1)-->(node2)<--(node3)-->(node4)
+	// (node0)-->(node1)-->(node2)<--(node3)-->(node4)
 	n0 := &Node0{}
 	n1 := &Node1{}
 	n2 := &Node2{}
@@ -712,7 +712,7 @@ func TestLoadFromLocalStore(t *testing.T) {
 	g.Expect(session.PurgeDatabase()).NotTo(HaveOccurred())
 	g.Expect(session.DisposeEventListener(eventListener)).NotTo(HaveOccurred())
 
-	//(node0)-->(node1)-->(node2)<--(node3)-->(node4)
+	// (node0)-->(node1)-->(node2)<--(node3)-->(node4)
 	n0 := &Node0{}
 	n1 := &Node1{}
 	n2 := &Node2{}
@@ -772,7 +772,7 @@ func TestSaveToDepthFromNode(t *testing.T) {
 	g.Expect(session.PurgeDatabase()).NotTo(HaveOccurred())
 	g.Expect(session.DisposeEventListener(eventListener)).NotTo(HaveOccurred())
 
-	//(node0)-->(node1)-->(node2)<--(node3)-->(node4)
+	// (node0)-->(node1)-->(node2)<--(node3)-->(node4)
 	n0 := &Node0{}
 	n1 := &Node1{}
 	n2 := &Node2{}
@@ -840,7 +840,7 @@ func TestSaveToDepthFromRelationship(t *testing.T) {
 	g.Expect(session.PurgeDatabase()).NotTo(HaveOccurred())
 	g.Expect(session.DisposeEventListener(eventListener)).NotTo(HaveOccurred())
 
-	//Context
+	// Context
 	simpleRelationship := &SimpleRelationship{}
 	n4 := &Node4{}
 	n5 := &Node5{}
@@ -917,7 +917,7 @@ func TestSaveRelationshipWithCustomID(t *testing.T) {
 	g.Expect(session.PurgeDatabase()).NotTo(HaveOccurred())
 	g.Expect(session.DisposeEventListener(eventListener)).NotTo(HaveOccurred())
 
-	//Context
+	// Context
 	r := &SimpleRelationship{}
 	r.TestID = "TestID"
 	n4 := &Node4{}
@@ -948,7 +948,7 @@ func TestTransactions(t *testing.T) {
 	g.Expect(session.PurgeDatabase()).NotTo(HaveOccurred())
 	g.Expect(session.DisposeEventListener(eventListener)).NotTo(HaveOccurred())
 
-	//(node0)-->(node1)-->(node2)<--(node3)-->(node4)
+	// (node0)-->(node1)-->(node2)<--(node3)-->(node4)
 	n0 := &Node0{}
 	n1 := &Node1{}
 	n2 := &Node2{}
@@ -978,7 +978,7 @@ func TestTransactions(t *testing.T) {
 	n0.Name = "0Update"
 	n2.Name = "2Update"
 
-	//Test Rolling back
+	// Test Rolling back
 	so.Depth = 3
 	g.Expect(session.Save(&n0, so)).NotTo(HaveOccurred())
 	g.Expect(tx.RollBack()).NotTo(HaveOccurred())
@@ -997,7 +997,7 @@ func TestTransactions(t *testing.T) {
 	g.Expect(n0.Name).To(Equal("0"))
 	g.Expect(*n3.ID).To(Equal(deletedID), "n3 gets deleted as it was rolled back. n3 can't ever be saved again. Must create new instance to save")
 
-	//Testing committing
+	// Testing committing
 	n3 = &Node3{}
 	n3.Name = "3"
 	n0.N1.N2.N3 = n3
@@ -1131,7 +1131,7 @@ func TestQueryForObject_s(t *testing.T) {
 	g.Expect(persons[0]).To(Equal(angelaScope))
 	g.Expect(persons[1]).To(Equal(jamesThompson))
 
-	//Note, just for comparison
+	// Note, just for comparison
 	jessicaThompson.Follows = nil
 	g.Expect(persons[2]).To(Equal(jessicaThompson))
 
@@ -1289,7 +1289,7 @@ func TestByteProperty(t *testing.T) {
 	n0.ByteProp = []byte("seafood")
 	g.Expect(session.Save(&n0, nil)).NotTo(HaveOccurred())
 
-	//update
+	// update
 	n0_1 := &Node0{}
 	n0_1.ID = n0.ID
 	n0_1.ByteProp = []byte("sea")
@@ -1374,7 +1374,7 @@ func TestNodeEmbedRichRelationshipWithSameNodes(t *testing.T) {
 	g.Expect(session.DisposeEventListener(eventListener)).NotTo(HaveOccurred())
 }
 
-//Error cases
+// Error cases
 func TestSaveNodeWithInvalidCustomID(t *testing.T) {
 	g := NewGomegaWithT(t)
 	g.Expect(session.PurgeDatabase()).NotTo(HaveOccurred())
