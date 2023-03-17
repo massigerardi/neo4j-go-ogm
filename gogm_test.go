@@ -29,8 +29,8 @@ import (
 
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 
-	gogm "github.com/codingfinest/neo4j-go-ogm"
-	. "github.com/codingfinest/neo4j-go-ogm/tests/models"
+	gogm "github.com/massigerardi/neo4j-go-ogm"
+	. "github.com/massigerardi/neo4j-go-ogm/tests/models"
 	. "github.com/onsi/gomega"
 )
 

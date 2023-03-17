@@ -22,7 +22,7 @@
 
 package models
 
-import gogm "github.com/codingfinest/neo4j-go-ogm"
+import gogm "github.com/massigerardi/neo4j-go-ogm"
 
 type Movie struct {
 	gogm.Node `gogm:"label:FILM,label:PICTURE"`

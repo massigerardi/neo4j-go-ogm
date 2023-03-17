@@ -22,14 +22,14 @@
 
 package models
 
-import gogm "github.com/codingfinest/neo4j-go-ogm"
+import gogm "github.com/massigerardi/neo4j-go-ogm"
 
 type TestRelationshipEntity struct {
 	gogm.Relationship
 	TestEntity
 }
 
-//Relationships
+// Relationships
 
 type SimpleRelationship struct {
 	TestRelationshipEntity
