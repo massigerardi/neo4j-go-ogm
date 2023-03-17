@@ -1,4 +1,4 @@
-module github.com/codingfinest/neo4j-go-ogm
+module github.com/massigerardi/neo4j-go-ogm
 
 go 1.13
 
